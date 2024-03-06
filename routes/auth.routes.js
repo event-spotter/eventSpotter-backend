@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const axios = require("axios");
 
 // ℹ️ Handles password encryption
 const bcrypt = require("bcrypt");
@@ -17,61 +18,77 @@ const { isAuthenticated } = require("../middleware/jwt.middleware.js");
 const saltRounds = 10;
 
 // POST /auth/signup  - Creates a new user in the database
-router.post("/signup", (req, res, next) => {
-  const { email, password, name } = req.body;
+router.post("/signup", async (req, res, next) => {
+  try {
+    const { email, password, username, name } = req.body;
 
-  // Check if email or password or name are provided as empty strings
-  if (email === "" || password === "" || name === "") {
-    res.status(400).json({ message: "Provide email, password and name" });
-    return;
-  }
+    // Check if email or password or name are provided as empty strings
+    if (email === "" || password === "" || name === "" || username === "") {
+      res.status(400).json({ message: "Provide email, password, username and name" });
+      return;
+    }
 
-  // This regular expression check that the email is of a valid format
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-  if (!emailRegex.test(email)) {
-    res.status(400).json({ message: "Provide a valid email address." });
-    return;
-  }
+    // This regular expression check that the email is of a valid format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailRegex.test(email)) {
+      res.status(400).json({ message: "Provide a valid email address." });
+      return;
+    }
 
-  // This regular expression checks password for special characters and minimum length
-  const passwordRegex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
-  if (!passwordRegex.test(password)) {
-    res.status(400).json({
-      message:
-        "Password must have at least 6 characters and contain at least one number, one lowercase and one uppercase letter.",
+    // This regular expression checks password for special characters and minimum length
+    const passwordRegex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
+    if (!passwordRegex.test(password)) {
+      res.status(400).json({
+        message:
+          "Password must have at least 6 characters and contain at least one number, one lowercase and one uppercase letter.",
+      });
+      return;
+    }
+
+    let imageUrl = null;
+    if (req.file) {
+      // Handle image upload to Cloudinary
+      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/upload`;
+      const dataToUpload = new FormData();
+      dataToUpload.append("file", req.file.path); // Assuming you use Multer for file uploads
+      dataToUpload.append("upload_preset", process.env.UNSIGNED_UPLOAD_PRESET);
+
+      const cloudinaryResponse = await axios.post(cloudinaryUrl, dataToUpload);
+      imageUrl = cloudinaryResponse.data.secure_url;
+    }
+
+    // Check the users collection if a user with the same email already exists
+    const foundUser = await User.findOne({ email });
+    if (foundUser) {
+      res.status(400).json({ message: "User already exists." });
+      return;
+    }
+
+    // If email is unique, proceed to hash the password
+    const salt = bcrypt.genSaltSync(saltRounds);
+    const hashedPassword = bcrypt.hashSync(password, salt);
+
+    // Create the new user in the database
+    const createdUser = await User.create({
+      email,
+      password: hashedPassword,
+      name,
+      username,
+      image: imageUrl,
     });
-    return;
+
+    // Deconstruct the newly created user object to omit the password
+    // We should never expose passwords publicly
+    const { _id } = createdUser;
+
+    // Create a new object that doesn't expose the password
+    const user = { email, name, username, _id };
+
+    // Send a json response containing the user object
+    res.status(201).json({ user: user });
+  } catch (err) {
+    next(err); // In this case, we send error handling to the error handling middleware.
   }
-
-  // Check the users collection if a user with the same email already exists
-  User.findOne({ email })
-    .then((foundUser) => {
-      // If the user with the same email already exists, send an error response
-      if (foundUser) {
-        res.status(400).json({ message: "User already exists." });
-        return;
-      }
-
-      // If email is unique, proceed to hash the password
-      const salt = bcrypt.genSaltSync(saltRounds);
-      const hashedPassword = bcrypt.hashSync(password, salt);
-
-      // Create the new user in the database
-      // We return a pending promise, which allows us to chain another `then`
-      return User.create({ email, password: hashedPassword, name });
-    })
-    .then((createdUser) => {
-      // Deconstruct the newly created user object to omit the password
-      // We should never expose passwords publicly
-      const { email, name, _id } = createdUser;
-
-      // Create a new object that doesn't expose the password
-      const user = { email, name, _id };
-
-      // Send a json response containing the user object
-      res.status(201).json({ user: user });
-    })
-    .catch((err) => next(err)); // In this case, we send error handling to the error handling middleware.
 });
 
 // POST  /auth/login - Verifies email and password and returns a JWT
