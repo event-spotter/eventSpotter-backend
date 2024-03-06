@@ -20,7 +20,7 @@ const saltRounds = 10;
 // POST /auth/signup  - Creates a new user in the database
 router.post("/signup", async (req, res, next) => {
   try {
-    const { email, password, username, name } = req.body;
+    const { email, password, username, name, image } = req.body;
 
     // Check if email or password or name are provided as empty strings
     if (email === "" || password === "" || name === "" || username === "") {
@@ -46,15 +46,11 @@ router.post("/signup", async (req, res, next) => {
     }
 
     let imageUrl = null;
-    if (req.file) {
-      // Handle image upload to Cloudinary
-      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/upload`;
-      const dataToUpload = new FormData();
-      dataToUpload.append("file", req.file.path); // Assuming you use Multer for file uploads
-      dataToUpload.append("upload_preset", process.env.UNSIGNED_UPLOAD_PRESET);
-
-      const cloudinaryResponse = await axios.post(cloudinaryUrl, dataToUpload);
-      imageUrl = cloudinaryResponse.data.secure_url;
+    if (image) {
+      const cloudinaryResponse = await cloudinary.uploader.upload(image, {
+        folder: "users", 
+      });
+      imageUrl = cloudinaryResponse.secure_url;
     }
 
     // Check the users collection if a user with the same email already exists
@@ -82,7 +78,7 @@ router.post("/signup", async (req, res, next) => {
     const { _id } = createdUser;
 
     // Create a new object that doesn't expose the password
-    const user = { email, name, username, _id };
+    const user = { email, name, username, image, _id };
 
     // Send a json response containing the user object
     res.status(201).json({ user: user });
