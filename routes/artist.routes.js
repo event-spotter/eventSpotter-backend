@@ -35,23 +35,9 @@ router.post("/artists", isAuthenticated, async (req, res, next) => {
     }
   });
 
-router.post("/artists"),
-  isAuthenticated,
-  (req, res, next) => {
-    const { name, genre, description, image } = req.body;
-
-    Artist.create({ name, genre, description, image })
-      .then((createdArtist) => {
-        res.status(201).json(createdArtist);
-      })
-      .catch((err) => {
-        next(err);
-      });
-  };
 
 // Retrieve list of Artists
-router.get("/artists"),
-  (req, res, next) => {
+router.get("/artists", (req, res, next) => {
     Artist.find()
       .then((listOfArtists) => {
         res.status(200).json(listOfArtists);
@@ -59,11 +45,10 @@ router.get("/artists"),
       .catch((err) => {
         next(err);
       });
-  };
+  });
 
 // Get Artist by ID
-router.get("/artists/:artistId"),
-  (req, res, next) => {
+router.get("/artists/:artistId", (req, res, next) => {
     Artist.findById(req.params.artistId)
       .then((artistById) => {
         res.status(200).json(artistById);
@@ -71,12 +56,10 @@ router.get("/artists/:artistId"),
       .catch((err) => {
         next(err);
       });
-  };
+  });
 
 // Update an Artist
-router.put("/artists/:artistId"),
-  isAuthenticated,
-  (req, res, next) => {
+router.put("/artists/:artistId", isAuthenticated, (req, res, next) => {
     Artist.findByIdAndUpdate(req.params.artistId, req.body, { new: true })
       .then((updateArtist) => {
         res.status(200).json(updateArtist);
@@ -84,12 +67,10 @@ router.put("/artists/:artistId"),
       .catch((err) => {
         next(err);
       });
-  };
+  });
 
 // Delete an Artist
-router.delete("/artists/:artistId"),
-  isAuthenticated,
-  (req, res, next) => {
+router.delete("/artists/:artistId", isAuthenticated, (req, res, next) => {
     Artist.findByIdAndDelete(req.params.artistId)
       .then(() => {
         res.status(204).json();
@@ -97,6 +78,6 @@ router.delete("/artists/:artistId"),
       .catch((err) => {
         next(err);
       });
-  };
+  });
 
 module.exports = router;
