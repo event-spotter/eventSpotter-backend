@@ -6,7 +6,7 @@ const {isAuthenticated} = require("../middleware/jwt.middleware");
 
 
 // POST /events
-router.post("/events", isAuthenticated, (req, res, next) => {
+router.post("/events", (req, res, next) => {
 
     const {title, description,location} = req.body;
 
