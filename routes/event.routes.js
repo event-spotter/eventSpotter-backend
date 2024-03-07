@@ -23,7 +23,7 @@ router.post("/events", isAuthenticated, (req, res, next) => {
 
 
 // GET /events
-router.get("/events", (req, res, next) => {
+router.get("/events", (req, res) => {
     Event.find()
         .populate("artist")
         .then( (eventsFromDB) => {
@@ -37,16 +37,17 @@ router.get("/events", (req, res, next) => {
 });
 
 // GET /events/:eventId 
-router.get("/events/:eventId ", (req, res, next) => {
-    const {eventsId} = req.params;
-
+router.get("/events/:eventId", (req, res) => {
+    
+    const {eventId} = req.params;
+    console.log(eventId);
     // validate eventId
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
         res.status(400).json({ message: 'Specified id is not valid' });
         return;
     }
 
-    Project.findById(eventId)
+    Event.findById(eventId)
         .populate("artist")
         .then( (eventDetails) => {
             res.json(eventDetails);
@@ -56,11 +57,11 @@ router.get("/events/:eventId ", (req, res, next) => {
             console.log(e)
             res.status(500).json({message: "Error getting event details"})
         });
-})
+});
 
 
 // PUT /events/:eventId 
-router.put("/events/:eventId ", isAuthenticated, (req, res, next) => {
+router.put("/events/:eventId", isAuthenticated, (req, res, next) => {
 
     const {eventId} = req.params;
     const {title, description} = req.body;
@@ -96,7 +97,7 @@ router.delete("/events/:eventId", isAuthenticated, (req, res, next) => {
         return;
     }
 
-    Project.findByIdAndDelete(eventId)
+    Event.findByIdAndDelete(eventId)
         .then( () => {
             res.json({ message: `Project with ${eventId} is removed successfully.` })
         })
