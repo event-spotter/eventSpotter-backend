@@ -90,6 +90,9 @@ router.post("/signup", async (req, res, next) => {
 router.post("/login", (req, res, next) => {
   const { email, password } = req.body;
 
+  console.log("Received email:", email);
+  console.log("Received password:", password);
+
   // Check if email or password are provided as empty string
   if (email === "" || password === "") {
     res.status(400).json({ message: "Provide email and password." });
@@ -99,6 +102,7 @@ router.post("/login", (req, res, next) => {
   // Check the users collection if a user with the same email exists
   User.findOne({ email })
     .then((foundUser) => {
+      console.log("Found user:", foundUser);
       if (!foundUser) {
         // If the user is not found, send an error response
         res.status(401).json({ message: "User not found." });
