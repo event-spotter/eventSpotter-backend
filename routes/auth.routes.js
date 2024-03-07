@@ -20,11 +20,11 @@ const saltRounds = 10;
 // POST /auth/signup  - Creates a new user in the database
 router.post("/signup", async (req, res, next) => {
   try {
-    const { email, password, username, name, image } = req.body;
+    const { email, password, name, image } = req.body;
 
     // Check if email or password or name are provided as empty strings
-    if (email === "" || password === "" || name === "" || username === "") {
-      res.status(400).json({ message: "Provide email, password, username and name" });
+    if (email === "" || password === "" || name === "") {
+      res.status(400).json({ message: "Provide email, password and name" });
       return;
     }
 
@@ -69,7 +69,6 @@ router.post("/signup", async (req, res, next) => {
       email,
       password: hashedPassword,
       name,
-      username,
       image: imageUrl,
     });
 
@@ -78,7 +77,7 @@ router.post("/signup", async (req, res, next) => {
     const { _id } = createdUser;
 
     // Create a new object that doesn't expose the password
-    const user = { email, name, username, image, _id };
+    const user = { email, name, image, _id };
 
     // Send a json response containing the user object
     res.status(201).json({ user: user });
