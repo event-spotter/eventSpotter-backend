@@ -6,13 +6,15 @@ const eventSchema = new Schema(
       type: String,
       required: [true, "Name is required."],
     },
-    artist: [{ type: Schema.Types.ObjectId, ref: "Artist" }],
+    artist: { 
+      type: Schema.Types.ObjectId, 
+      ref: "Artist" },
     description: {
       type: String
     },
     category: {
         type: String,
-        enum: ["Concerts, Theatre, Comedy, Dance, Museum"]
+        enum: ["Concert", "Theatre", "Comedy", "Dance", "Museum"]
       },
     image: {
         type: String,

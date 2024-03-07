@@ -8,9 +8,9 @@ const {isAuthenticated} = require("../middleware/jwt.middleware");
 // POST /events
 router.post("/events", (req, res, next) => {
 
-    const {title, description,location} = req.body;
+    const {title,artist, description, category, image, location, date } = req.body;
 
-    Event.create({title, description,location})
+    Event.create({title, artist, description, category, image, location, date })
         .then( (createdEvent) => {
             res.status(201).json(createdEvent)
         })
@@ -64,7 +64,7 @@ router.get("/events/:eventId", (req, res) => {
 router.put("/events/:eventId", isAuthenticated, (req, res, next) => {
 
     const {eventId} = req.params;
-    const {title, description} = req.body;
+    const {title, artist,  description,  category, image, location, date } = req.body;
 
     // validate eventId
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
