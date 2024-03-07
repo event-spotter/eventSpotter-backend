@@ -19,6 +19,7 @@ const saltRounds = 10;
 
 // POST /auth/signup  - Creates a new user in the database
 router.post("/signup", async (req, res, next) => {
+  console.log("Signup request body:", req.body);
   try {
     const { email, password, name, image } = req.body;
 
@@ -44,12 +45,13 @@ router.post("/signup", async (req, res, next) => {
       });
       return;
     }
-
+    console.log("Signup request body:", req.body);
     let imageUrl = null;
     if (image) {
       const cloudinaryResponse = await cloudinary.uploader.upload(image, {
         folder: "users", 
       });
+      console.log("Cloudinary response:", cloudinaryResponse);
       imageUrl = cloudinaryResponse.secure_url;
     }
 

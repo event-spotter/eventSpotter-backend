@@ -1,5 +1,6 @@
 const { Schema, model } = require("mongoose");
 const axios = require("axios")
+const FormData = require("form-data"); 
 
 // TODO: Please make sure you edit the User model to whatever makes sense in this case
 const userSchema = new Schema(
@@ -29,22 +30,22 @@ const userSchema = new Schema(
   }
 );
 
-userSchema.methods.uploadImageToCloudinary = async function (file) {
-  const url = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/upload`;
+// userSchema.methods.uploadImageToCloudinary = async function (file) {
+//   const url = `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_NAME}/upload`;
 
-  const dataToUpload = new FormData();
-  dataToUpload.append("file", file);
-  dataToUpload.append("upload_preset", process.env.UNSIGNED_UPLOAD_PRESET);
+//   const dataToUpload = new FormData();
+//   dataToUpload.append("file", file);
+//   dataToUpload.append("upload_preset", process.env.UNSIGNED_UPLOAD_PRESET);
 
-  try {
-    const response = await axios.post(url, dataToUpload);
-    this.image = response.data.secure_url;
-    return this.image;
-  } catch (error) {
-    console.error("Error uploading the file:", error);
-    throw new Error("Error uploading the file");
-  }
-};
+//   try {
+//     const response = await axios.post(url, dataToUpload);
+//     this.image = response.data.secure_url;
+//     return this.image;
+//   } catch (error) {
+//     console.error("Error uploading the file:", error);
+//     throw new Error("Error uploading the file");
+//   }
+// };
 
 const User = model("User", userSchema);
 
