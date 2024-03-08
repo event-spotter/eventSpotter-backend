@@ -6,7 +6,7 @@ const Artist = require("../models/Artist.model");
 const { isAuthenticated } = require("../middleware/jwt.middleware");
 
 // Create a new Artist
-router.post("/artists", isAuthenticated, async (req, res, next) => {
+router.post("/artists", async (req, res, next) => {
     try {
       const { name, genre, description, image } = req.body;
       if (!name) {

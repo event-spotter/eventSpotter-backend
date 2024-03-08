@@ -8,11 +8,15 @@ const {isAuthenticated} = require("../middleware/jwt.middleware");
 // POST /events
 router.post("/events", (req, res, next) => {
 
-    const {title,artist, description, category, image, location, date } = req.body;
+    const {title, artist, description, category, image, location, date } = req.body;
 
     Event.create({title, artist, description, category, image, location, date })
         .then( (createdEvent) => {
-            res.status(201).json(createdEvent)
+            return Event.populate(createdEvent, {path: "artist"});
+        })
+        .then((populatedEvent) => {
+           res.status(201).json(populatedEvent);
+          
         })
         .catch( (e) => {
             console.log("Error creating a new event");
@@ -61,7 +65,7 @@ router.get("/events/:eventId", (req, res) => {
 
 
 // PUT /events/:eventId 
-router.put("/events/:eventId", isAuthenticated, (req, res, next) => {
+router.put("/events/:eventId", (req, res, next) => {
 
     const {eventId} = req.params;
     const {title, artist,  description,  category, image, location, date } = req.body;
@@ -72,7 +76,8 @@ router.put("/events/:eventId", isAuthenticated, (req, res, next) => {
         return;
     }
 
-    Event.findByIdAndUpdate(eventId, {title, description}, { new: true })
+    Event.findByIdAndUpdate(eventId, {title, description, artist, category, image, location, date}, { new: true })
+        .populate("artist")
         .then( (updatedEvent) => {
             res.json(updatedEvent);
         })
@@ -87,7 +92,7 @@ router.put("/events/:eventId", isAuthenticated, (req, res, next) => {
 
 
 // DELETE /events/:eventId
-router.delete("/events/:eventId", isAuthenticated, (req, res, next) => {
+router.delete("/events/:eventId", (req, res, next) => {
 
     const {eventId} = req.params;
 
