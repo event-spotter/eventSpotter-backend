@@ -1,9 +1,8 @@
-const router = require('express').Router();
-const mongoose = require('mongoose');
+const router = require("express").Router();
+const mongoose = require("mongoose");
 const Event = require("../models/Event.model");
 
-const {isAuthenticated} = require("../middleware/jwt.middleware");
-
+const { isAuthenticated } = require("../middleware/jwt.middleware");
 
 // POST /events
 router.post("/events", (req, res, next) => {
@@ -25,44 +24,41 @@ router.post("/events", (req, res, next) => {
         });
 });
 
-
 // GET /events
 router.get("/events", (req, res) => {
-    Event.find()
-        .populate("artist")
-        .then( (eventsFromDB) => {
-            res.json(eventsFromDB);
-        })
-        .catch( (e) => {
-            console.log("Error getting list of events");
-            console.log(e)
-            res.status(500).json({message: "Error getting list of events"})
-        });
+  Event.find()
+    .populate("artist")
+    .then((eventsFromDB) => {
+      res.json(eventsFromDB);
+    })
+    .catch((e) => {
+      console.log("Error getting list of events");
+      console.log(e);
+      res.status(500).json({ message: "Error getting list of events" });
+    });
 });
 
-// GET /events/:eventId 
+// GET /events/:eventId
 router.get("/events/:eventId", (req, res) => {
-    
-    const {eventId} = req.params;
-    console.log(eventId);
-    // validate eventId
-    if (!mongoose.Types.ObjectId.isValid(eventId)) {
-        res.status(400).json({ message: 'Specified id is not valid' });
-        return;
-    }
+  const { eventId } = req.params;
+  console.log(eventId);
+  // validate eventId
+  if (!mongoose.Types.ObjectId.isValid(eventId)) {
+    res.status(400).json({ message: "Specified id is not valid" });
+    return;
+  }
 
-    Event.findById(eventId)
-        .populate("artist")
-        .then( (eventDetails) => {
-            res.json(eventDetails);
-        })
-        .catch( (e) => {
-            console.log("Error getting event details");
-            console.log(e)
-            res.status(500).json({message: "Error getting event details"})
-        });
+  Event.findById(eventId)
+    .populate("artist")
+    .then((eventDetails) => {
+      res.json(eventDetails);
+    })
+    .catch((e) => {
+      console.log("Error getting event details");
+      console.log(e);
+      res.status(500).json({ message: "Error getting event details" });
+    });
 });
-
 
 // PUT /events/:eventId 
 router.put("/events/:eventId", (req, res, next) => {
@@ -70,11 +66,11 @@ router.put("/events/:eventId", (req, res, next) => {
     const {eventId} = req.params;
     const {title, artist,  description,  category, image, location, date } = req.body;
 
-    // validate eventId
-    if (!mongoose.Types.ObjectId.isValid(eventId)) {
-        res.status(400).json({ message: 'Specified id is not valid' });
-        return;
-    }
+  // validate eventId
+  if (!mongoose.Types.ObjectId.isValid(eventId)) {
+    res.status(400).json({ message: "Specified id is not valid" });
+    return;
+  }
 
     Event.findByIdAndUpdate(eventId, {title, description, artist, category, image, location, date}, { new: true })
         .populate("artist")
@@ -89,29 +85,26 @@ router.put("/events/:eventId", (req, res, next) => {
 
 });
 
-
-
 // DELETE /events/:eventId
 router.delete("/events/:eventId", (req, res, next) => {
 
     const {eventId} = req.params;
 
-    // validate projectId
-    if (!mongoose.Types.ObjectId.isValid(eventId)) {
-        res.status(400).json({ message: 'Specified id is not valid' });
-        return;
-    }
+  // validate projectId
+  if (!mongoose.Types.ObjectId.isValid(eventId)) {
+    res.status(400).json({ message: "Specified id is not valid" });
+    return;
+  }
 
-    Event.findByIdAndDelete(eventId)
-        .then( () => {
-            res.json({ message: `Project with ${eventId} is removed successfully.` })
-        })
-        .catch( (e) => {
-            console.log("Error deleting event");
-            console.log(e)
-            res.status(500).json({message: "Error deleting event"})
-        });
+  Event.findByIdAndDelete(eventId)
+    .then(() => {
+      res.json({ message: `Project with ${eventId} is removed successfully.` });
+    })
+    .catch((e) => {
+      console.log("Error deleting event");
+      console.log(e);
+      res.status(500).json({ message: "Error deleting event" });
+    });
 });
-
 
 module.exports = router;
