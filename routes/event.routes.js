@@ -5,9 +5,10 @@ const Event = require("../models/Event.model");
 const { isAuthenticated } = require("../middleware/jwt.middleware");
 
 // POST /events
-router.post("/events", (req, res, next) => {
+router.post("/events", isAuthenticated, (req, res, next) => {
 
     const {title, artist, description, category, image, location, date } = req.body;
+
 
     Event.create({title, artist, description, category, image, location, date })
         .then( (createdEvent) => {
@@ -61,7 +62,7 @@ router.get("/events/:eventId", (req, res) => {
 });
 
 // PUT /events/:eventId 
-router.put("/events/:eventId", (req, res, next) => {
+router.put("/events/:eventId", isAuthenticated, (req, res, next) => {
 
     const {eventId} = req.params;
     const {title, artist,  description,  category, image, location, date } = req.body;
@@ -86,7 +87,7 @@ router.put("/events/:eventId", (req, res, next) => {
 });
 
 // DELETE /events/:eventId
-router.delete("/events/:eventId", (req, res, next) => {
+router.delete("/events/:eventId", isAuthenticated, (req, res, next) => {
 
     const {eventId} = req.params;
 

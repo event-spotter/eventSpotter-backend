@@ -107,6 +107,7 @@ router.post("/login", (req, res, next) => {
 
       // Compare the provided password with the one saved in the database
       const passwordCorrect = bcrypt.compareSync(password, foundUser.password);
+      console.log("Password correct:", passwordCorrect);
 
       if (passwordCorrect) {
         // Deconstruct the user object to omit the password

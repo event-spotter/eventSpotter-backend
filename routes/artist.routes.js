@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 const FormData = require("form-data");
 
 const Artist = require("../models/Artist.model");
 const { isAuthenticated } = require("../middleware/jwt.middleware");
 
 // Create a new Artist
-router.post("/artists", async (req, res, next) => {
+router.post("/artists", isAuthenticated, async (req, res, next) => {
     try {
       const { name, genre, description, image } = req.body;
       if (!name) {
@@ -71,12 +72,22 @@ router.put("/artists/:artistId", isAuthenticated, (req, res, next) => {
 
 // Delete an Artist
 router.delete("/artists/:artistId", isAuthenticated, (req, res, next) => {
-    Artist.findByIdAndDelete(req.params.artistId)
+  
+  const {artistId} = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(artistId)) {
+    res.status(400).json({ message: "Specified id is not valid" });
+    return;
+  }
+
+    Artist.findByIdAndDelete(artistId)
       .then(() => {
-        res.status(204).json();
+        res.json({ message: `Artist with ${artistId} is removed successfully.` });
       })
       .catch((err) => {
-        next(err);
+        console.log("Error deleting artist");
+        console.log(e);
+        res.status(500).json({ message: "Error deleting artist" });
       });
   });
 
