@@ -11,7 +11,8 @@ const artistSchema = new Schema(
         type: String
       },
     description: {
-      type: String
+      type: String,
+      maxlength: [100, "Description cannot exceed 100 characters."],
     },
     image: {
         type: String,
