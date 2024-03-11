@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 
+const fileUploader = require("../config/cloudinary.config");
+
 // ℹ️ Handles password encryption
 const bcrypt = require("bcrypt");
 
@@ -17,6 +19,18 @@ const { isAuthenticated } = require("../middleware/jwt.middleware.js");
 // How many rounds should bcrypt run the salt (default - 10 rounds)
 const saltRounds = 10;
 
+
+// POST "/api/upload" => Route that receives the image, sends it to Cloudinary via the fileUploader and returns the image URL
+router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
+  // console.log("file is: ", req.file)
+  if (!req.file) {
+    next(new Error("No file uploaded!"));
+    return;
+  }
+  // Get the URL of the uploaded file and send it as a response.
+  // 'fileUrl' can be any name, just make sure you remember to use the same when accessing it on the frontend
+  res.json({ imageUrl: req.file.path });
+});
 
 // POST /auth/signup  - Creates a new user in the database
 router.post("/signup", async (req, res, next) => {
@@ -47,7 +61,14 @@ router.post("/signup", async (req, res, next) => {
       return;
     }
     console.log("Signup request body:", req.body);
-   
+    let imageUrl = null;
+    if (image) {
+      const cloudinaryResponse = await cloudinary.uploader.upload(image, {
+        folder: "users", 
+      });
+      console.log("Cloudinary response:", cloudinaryResponse);
+      imageUrl = cloudinaryResponse.secure_url;
+    }
 
     // Check the users collection if a user with the same email already exists
     const foundUser = await User.findOne({ email });
@@ -65,7 +86,7 @@ router.post("/signup", async (req, res, next) => {
       email,
       password: hashedPassword,
       name,
-      image
+      image: imageUrl,
     });
 
     // Deconstruct the newly created user object to omit the password
@@ -107,7 +128,6 @@ router.post("/login", (req, res, next) => {
 
       // Compare the provided password with the one saved in the database
       const passwordCorrect = bcrypt.compareSync(password, foundUser.password);
-      console.log("Password correct:", passwordCorrect);
 
       if (passwordCorrect) {
         // Deconstruct the user object to omit the password
@@ -139,6 +159,13 @@ router.get("/verify", isAuthenticated, (req, res, next) => {
 
   // Send back the token payload object containing the user data
   res.status(200).json(req.payload);
+});
+
+router.get('/profile', isAuthenticated, (req, res) => {
+  const { _id } = req.payload; 
+  User.findOne({_id:_id},{password: 0,createdAt:0,updatedAt:0 })
+    .then(user => res.json(user))
+    .catch(err => res.json(err));
 });
 
 module.exports = router;
