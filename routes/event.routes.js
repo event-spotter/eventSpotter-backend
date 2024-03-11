@@ -99,7 +99,7 @@ router.delete("/events/:eventId", isAuthenticated, (req, res, next) => {
 
   Event.findByIdAndDelete(eventId)
     .then(() => {
-      res.json({ message: `Project with ${eventId} is removed successfully.` });
+      res.json({ message: `Event with ${eventId} is removed successfully.` });
     })
     .catch((e) => {
       console.log("Error deleting event");

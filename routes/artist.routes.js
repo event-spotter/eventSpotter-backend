@@ -7,35 +7,23 @@ const Artist = require("../models/Artist.model");
 const { isAuthenticated } = require("../middleware/jwt.middleware");
 
 // Create a new Artist
-router.post("/artists", isAuthenticated, async (req, res, next) => {
-    try {
-      const { name, genre, description, image } = req.body;
-      if (!name) {
-        res.status(400).json({ message: "Name is required." });
-        return;
-      }
+router.post("/artists", isAuthenticated, (req, res, next) => {
 
-      let imageUrl = ""; 
-      if (image) {
-        const cloudinaryResponse = await cloudinary.uploader.upload(image, {
-          folder: "artists", 
-        });
-        imageUrl = cloudinaryResponse.secure_url;
-      }
-  
-      const createdArtist = await Artist.create({
+      const { name, genre, description, image } = req.body;
+    
+      Artist.create({
         name,
         genre,
         description,
-        image: imageUrl,
-      });
-  
-      res.status(201).json(createdArtist);
-    } catch (err) {
-      next(err);
-    }
-  });
-
+        image
+      })
+      .then ((response) => res.json(response))
+     .catch( (e) => {
+         console.log("Error creating a new artist");
+         console.log(e)
+         res.status(500).json({message: "Error creating a new artist"})
+     });
+});
 
 // Retrieve list of Artists
 router.get("/artists", (req, res, next) => {
