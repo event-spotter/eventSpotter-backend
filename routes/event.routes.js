@@ -9,8 +9,15 @@ router.post("/events", isAuthenticated, (req, res, next) => {
 
     const {title, artist, description, category, image, location, date } = req.body;
 
+  // Validate the date format before parsing
+  if (!Date.parse(date)) {
+    return res.status(400).json({ message: "Invalid date format. Date must be in YYYY-MM-DD format." });
+}
 
-    Event.create({title, artist, description, category, image, location, date })
+// Convert date string to Date object
+const formattedDate = new Date(date);
+
+    Event.create({title, artist, description, category, image, location, date: formattedDate })
         .then( (createdEvent) => {
             return Event.populate(createdEvent, {path: "artist"});
         })
