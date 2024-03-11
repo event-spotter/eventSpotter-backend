@@ -8,7 +8,8 @@ const eventSchema = new Schema(
     },
     artist: { 
       type: Schema.Types.ObjectId, 
-      ref: "Artist" },
+      ref: "Artist" 
+    },
     description: {
       type: String
     },
@@ -28,6 +29,10 @@ const eventSchema = new Schema(
         type: Date, 
         default: Date.now
     },
+    owner:{
+      type: Schema.Types.ObjectId,
+      ref: "User"  
+    }
   },
   {
     // this second object adds extra properties: `createdAt` and `updatedAt`

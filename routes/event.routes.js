@@ -9,8 +9,8 @@ router.post("/events", isAuthenticated, (req, res, next) => {
 
     const {title, artist, description, category, image, location, date } = req.body;
 
-
-    Event.create({title, artist, description, category, image, location, date })
+    let owner = req.payload._id;
+    Event.create({title, artist, description, category, image, location, date, owner })
         .then( (createdEvent) => {
             return Event.populate(createdEvent, {path: "artist"});
         })
@@ -37,6 +37,30 @@ router.get("/events", (req, res) => {
       console.log(e);
       res.status(500).json({ message: "Error getting list of events" });
     });
+});
+
+
+router.get("/events/user/:userId", isAuthenticated, (req, res) => {
+
+    const { userId } = req.params;
+    console.log(userId);
+    // validate eventId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      res.status(400).json({ message: "Specified id is not valid" });
+      return;
+    }
+  
+    Event.find({owner:userId})
+      .populate("artist")
+      .then((eventDetails) => {
+        console.log(eventDetails);
+        res.json(eventDetails);
+      })
+      .catch((e) => {
+        console.log("Error getting event details");
+        console.log(e);
+        res.status(500).json({ message: "Error getting event details" });
+      });
 });
 
 // GET /events/:eventId
