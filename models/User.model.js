@@ -22,6 +22,9 @@ const userSchema = new Schema(
     },
     image: {
       type: String
+    },
+    favoriteEvents: {
+      type: Array
     }
   },
   {

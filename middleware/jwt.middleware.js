@@ -1,4 +1,6 @@
 const jwt = require("jsonwebtoken")
+const mongoose = require("mongoose");
+const Event = require("../models/Event.model");
 
 // Instantiate the JWT token validation middleware
 const isAuthenticated = (req, res, next) => {
@@ -23,7 +25,41 @@ const isAuthenticated = (req, res, next) => {
   }
 }
 
+
+const isEventOwner = (req, res, next) => {
+ 
+console.log("checking ownerId");
+  try {
+     
+    let ownerId = req.payload._id;
+    const {eventId} = req.params;
+
+    Event.find({_id: eventId,owner:ownerId})
+    .then( (responseArr) => {
+      console.log(responseArr);
+      if(responseArr.length<1){
+        res.status(500).json({message: "Error getting event"})
+      }else {
+        console.log("right owner");
+        next()
+      } 
+    })
+    .catch( (e) => {
+        console.log("Error updating event");
+        console.log(e)
+        res.status(500).json({message: "Error getting event"})
+    });
+
+   
+
+  } catch (error) {
+    
+    res.status(401).json({error: "Token not valid"})
+  }
+}
+
 // Export the middleware so that we can use it to create protected routes
 module.exports = {
-  isAuthenticated
+  isAuthenticated,
+  isEventOwner
 }
