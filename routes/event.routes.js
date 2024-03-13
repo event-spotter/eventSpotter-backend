@@ -31,7 +31,7 @@ router.post("/events", isAuthenticated, (req, res, next) => {
     category,
     image,
     location,
-    date,
+    date: formattedDate,
     owner,
   })
     .then((createdEvent) => {
