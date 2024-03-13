@@ -27,6 +27,13 @@ router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
     next(new Error("No file uploaded!"));
     return;
   }
+  const allowedFormats = ["jpg", "jpeg", "png"];
+  const fileExtension = path.extname(req.file.originalname).toLowerCase().substring(1);
+
+  if (!allowedFormats.includes(fileExtension)) {
+    res.status(400).json({ message: "Allowed formats: jpg, png" });
+    return;
+  }
   // Get the URL of the uploaded file and send it as a response.
   // 'fileUrl' can be any name, just make sure you remember to use the same when accessing it on the frontend
   res.json({ imageUrl: req.file.path });
