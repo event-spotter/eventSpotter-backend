@@ -59,14 +59,14 @@ router.get("/users/favorites/:eventId", isAuthenticated, (req, res, next) => {
     return;
   }
 
-  User.updateOne(
+  User.findByIdAndUpdate(
     { _id: userId },
     { $addToSet: { favoriteEvents: eventId } },
     { new: true, upsert: true }
   )
     .select({ password: 0, createdAt: 0, updatedAt: 0 })
     .then((updatedUser) => {
-      res.status(200).json({ message: "Added to Favorites" });
+      res.status(200).json(updatedUser);
     })
     .catch((e) => {
       console.log("Error adding to Favorites ");
@@ -93,17 +93,19 @@ router.delete(
       return;
     }
 
-    User.updateOne(
+    User.findByIdAndUpdate(
       { _id: userId },
       {
         $pullAll: {
           favoriteEvents: [eventId],
         }
-      }
+      },
+      { new: true}
     )
       .select({ password: 0, createdAt: 0, updatedAt: 0 })
       .then((updatedUser) => {
-        res.status(200).json({ message: "Deleted from Favorites" });
+        console.log(updatedUser);
+        res.status(200).json(updatedUser);
       })
       .catch((e) => {
         console.log("Error removing from Favorites ");

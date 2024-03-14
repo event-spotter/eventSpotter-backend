@@ -171,6 +171,7 @@ router.delete(
   "/events/:eventId",
   isAuthenticated,
   isEventOwner,
+  
   (req, res, next) => {
     const { eventId } = req.params;
 
