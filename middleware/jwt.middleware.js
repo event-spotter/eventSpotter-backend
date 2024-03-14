@@ -34,7 +34,7 @@ console.log("checking ownerId");
     const ownerId = req.payload._id;
     const {eventId} = req.params;
 
-    Event.findOne({_id: eventId, owner:ownerId })
+    Event.findOne({_id: eventId, owner: ownerId })
     .then((event) => {
       if (!event) {
         return res.status(404).json({ message: "Event not found" });
