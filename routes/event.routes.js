@@ -170,35 +170,61 @@ router.put(
 router.delete(
   "/events/:eventId",
   isAuthenticated,
-
-  (req, res, net) => {
+  isEventOwner,
+  (req, res, next) => {
     const { eventId } = req.params;
-    const ownerId = req.payload._id;
 
-    // validate eventId
+    // validate projectId
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
       res.status(400).json({ message: "Specified id is not valid" });
       return;
     }
-
-    Event.findById(eventId)
-    .then((event) => {
-      if (!event) {
-        return res.status(404).json({ message: `Event with id ${eventId} not found` });
-      } 
-
-      // If the user is the owner, proceed with deleting the event
-      return Event.findByIdAndDelete(eventId);
-    })
+    Event.findByIdAndDelete(eventId)
     .then(() => {
-        res.json({ message: `Event with id ${eventId} is removed successfully.` });
+      res.json({ message: `Event with ${eventId} is removed successfully.` });
     })
-    .catch((error) => {
-      console.log("Error deleting event", error);
+    .catch((e) => {
+      console.log("Error deleting event");
+      console.log(e);
       res.status(500).json({ message: "Error deleting event" });
     });
 }
-);
+)
+
+
+// router.delete(
+//   "/events/:eventId",
+//   isAuthenticated,
+//   isEventOwner,
+
+//   (req, res, net) => {
+//     const { eventId } = req.params;
+//     const ownerId = req.payload._id;
+
+//     // validate eventId
+//     if (!mongoose.Types.ObjectId.isValid(eventId)) {
+//       res.status(400).json({ message: "Specified id is not valid" });
+//       return;
+//     }
+
+//     Event.findById(eventId)
+//     .then((event) => {
+//       if (!event) {
+//         return res.status(404).json({ message: `Event with id ${eventId} not found` });
+//       } 
+
+//       // If the user is the owner, proceed with deleting the event
+//       return Event.findByIdAndDelete(eventId);
+//     })
+//     .then(() => {
+//         res.json({ message: `Event with id ${eventId} is removed successfully.` });
+//     })
+//     .catch((error) => {
+//       console.log("Error deleting event", error);
+//       res.status(500).json({ message: "Error deleting event" });
+//     });
+// }
+// );
 
 
 module.exports = router;

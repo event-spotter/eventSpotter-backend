@@ -34,21 +34,29 @@ console.log("checking ownerId");
     const ownerId = req.payload._id;
     const {eventId} = req.params;
 
-    Event.findOne({_id: eventId, owner: ownerId })
-    .then((event) => {
-      if (!event) {
-        return res.status(404).json({ message: "Event not found" });
-      }
-      next();
+    Event.find({_id: eventId, owner: ownerId })
+    .then( (responseArr) => {
+      console.log(responseArr);
+      if(responseArr.length<1){
+        res.status(500).json({message: "Error getting event"})
+      }else {
+        console.log("right owner");
+        next()
+      } 
     })
-    .catch((error) => {
-      console.log("Error checking event ownership:", error);
-      res.status(500).json({ message: "Error checking event ownership" });
+    .catch( (e) => {
+        console.log("Error updating event");
+        console.log(e)
+        res.status(500).json({message: "Error getting event"})
     });
-} catch (error) {
-  res.status(401).json({ error: "Token not valid" });
+
+
+
+  } catch (error) {
+
+    res.status(401).json({error: "Token not valid"})
+  }
 }
-};
 
    
 
