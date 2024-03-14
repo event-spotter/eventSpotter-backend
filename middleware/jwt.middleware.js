@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken")
 const mongoose = require("mongoose");
 const Event = require("../models/Event.model");
+const Artist = require("../models/Artist.model");
 
 // Instantiate the JWT token validation middleware
 const isAuthenticated = (req, res, next) => {
@@ -27,10 +28,8 @@ const isAuthenticated = (req, res, next) => {
 
 
 const isEventOwner = (req, res, next) => {
- 
 console.log("checking ownerId");
   try {
-     
     const ownerId = req.payload._id;
     const {eventId} = req.params;
 
@@ -49,19 +48,42 @@ console.log("checking ownerId");
         console.log(e)
         res.status(500).json({message: "Error getting event"})
     });
-
-
-
   } catch (error) {
-
     res.status(401).json({error: "Token not valid"})
   }
 }
 
+
+const isArtistOwner = (req, res, next) => {
+  console.log("checking ownerId");
+    try {
+      const ownerId = req.payload._id;
+      const {artistId} = req.params;
+  
+      Artist.find({_id: artistId, owner: ownerId })
+      .then( (responseArr) => {
+        console.log(responseArr);
+        if(responseArr.length<1){
+          res.status(500).json({message: "Error getting artist"})
+        }else {
+          console.log("right owner");
+          next()
+        } 
+      })
+      .catch( (e) => {
+          console.log("Error updating artist");
+          console.log(e)
+          res.status(500).json({message: "Error getting artist"})
+      });
+    } catch (error) {
+      res.status(401).json({error: "Token not valid"})
+    }
+  }
    
 
 // Export the middleware so that we can use it to create protected routes
 module.exports = {
   isAuthenticated,
-  isEventOwner
+  isEventOwner,
+  isArtistOwner,
 }

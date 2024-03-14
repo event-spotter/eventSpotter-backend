@@ -2,9 +2,10 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const FormData = require("form-data");
+const User = require("../models/User.model");
 
 const Artist = require("../models/Artist.model");
-const { isAuthenticated } = require("../middleware/jwt.middleware");
+const { isAuthenticated, isArtistOwner, } = require("../middleware/jwt.middleware");
 
 // Create a new Artist
 router.post("/artists", isAuthenticated, (req, res, next) => {
@@ -59,7 +60,7 @@ router.put("/artists/:artistId", isAuthenticated, (req, res, next) => {
   });
 
 // Delete an Artist
-router.delete("/artists/:artistId", isAuthenticated, (req, res, next) => {
+router.delete("/artists/:artistId", isAuthenticated, isArtistOwner, (req, res, next) => {
   
   const {artistId} = req.params;
 
