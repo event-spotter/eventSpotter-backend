@@ -31,32 +31,26 @@ const isEventOwner = (req, res, next) => {
 console.log("checking ownerId");
   try {
      
-    let ownerId = req.payload._id;
+    const ownerId = req.payload._id;
     const {eventId} = req.params;
 
-    Event.find({_id: eventId,owner:ownerId})
-    .then( (responseArr) => {
-      console.log(responseArr);
-      if(responseArr.length<1){
-        res.status(500).json({message: "Error getting event"})
-      }else {
-        console.log("right owner");
-        next()
-      } 
+    Event.findOne({_id: eventId, owner:ownerId })
+    .then((event) => {
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      next();
     })
-    .catch( (e) => {
-        console.log("Error updating event");
-        console.log(e)
-        res.status(500).json({message: "Error getting event"})
+    .catch((error) => {
+      console.log("Error checking event ownership:", error);
+      res.status(500).json({ message: "Error checking event ownership" });
     });
+} catch (error) {
+  res.status(401).json({ error: "Token not valid" });
+}
+};
 
    
-
-  } catch (error) {
-    
-    res.status(401).json({error: "Token not valid"})
-  }
-}
 
 // Export the middleware so that we can use it to create protected routes
 module.exports = {
