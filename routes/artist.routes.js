@@ -11,12 +11,14 @@ const { isAuthenticated, isArtistOwner, } = require("../middleware/jwt.middlewar
 router.post("/artists", isAuthenticated, (req, res, next) => {
 
       const { name, genre, description, image } = req.body;
-    
+      
+      let owner = req.payload._id;
       Artist.create({
         name,
         genre,
         description,
-        image
+        image, 
+        owner,
       })
       .then ((response) => res.json(response))
      .catch( (e) => {
