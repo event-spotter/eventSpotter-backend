@@ -170,13 +170,15 @@ router.put(
 router.delete(
   "/events/:eventId",
   isAuthenticated,
-  (req, res, next) => {
+
+  (req, res, net) => {
     const { eventId } = req.params;
     const ownerId = req.payload._id;
 
     // validate eventId
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
-      return res.status(400).json({ message: "Specified id is not valid" });
+      res.status(400).json({ message: "Specified id is not valid" });
+      return;
     }
 
     Event.findById(eventId)
@@ -185,19 +187,11 @@ router.delete(
         return res.status(404).json({ message: `Event with id ${eventId} not found` });
       } 
 
-      // Check if the authenticated user is the owner of the event
-      if (event.owner.toString() !== ownerId) {
-        return res.status(401).json({ message: "You are not the owner and are not allowed to delete this event." });
-      }
-
       // If the user is the owner, proceed with deleting the event
       return Event.findByIdAndDelete(eventId);
     })
-    .then((deletedEvent) => {
-      if (!deletedEvent) {
-        return res.status(404).json({ message: `Event with id ${eventId} not found` });
-      }
-      res.json({ message: `Event with id ${eventId} is removed successfully.` });
+    .then(() => {
+        res.json({ message: `Event with id ${eventId} is removed successfully.` });
     })
     .catch((error) => {
       console.log("Error deleting event", error);
